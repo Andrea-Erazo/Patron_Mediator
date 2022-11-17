@@ -3,7 +3,6 @@ package mediator;
 
 import components.Title;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -16,13 +15,12 @@ import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 import components.TextBox;
 import components.AddButton;
+import components.Component;
 import components.DeleteButton;
 import components.SaveButton;
 import components.Filter;
 import components.List;
 import javax.swing.ListModel;
-
-
 
 
 /**
@@ -41,12 +39,63 @@ public class Editor implements Mediator {
     private JLabel titleLabel = new JLabel("Title:");
     private JLabel textLabel = new JLabel("Text:");
     private JLabel label = new JLabel("Add or select existing note to proceed...");
-  
-    /**
-     * Here the registration of components by the mediator.
-     * @param 
-     */
+    
+    
     @Override
+    public void addNewNote(Note note) {
+       title.setText("");
+        textBox.setText("");
+        list.addElement(note);
+    }
+
+    @Override
+    public void deleteNote() {
+        list.deleteElement();
+    }
+
+    @Override
+    public void getInfoFromList(Note note) {
+        title.setText(note.getName().replace('*', ' '));
+        textBox.setText(note.getText());
+    }
+
+    @Override
+    public void saveChanges() {
+       try {
+            Note note = (Note) list.getSelectedValue();
+            note.setName(title.getText());
+            note.setText(textBox.getText());
+            list.repaint();
+        } catch (NullPointerException ignored) {}
+    }
+
+    @Override
+    public void markNote() {
+        try {
+            Note note = list.getCurrentElement();
+            String name = note.getName();
+            if (!name.endsWith("*")) {
+                note.setName(note.getName() + "*");
+            }
+            list.repaint();
+        } catch (NullPointerException ignored) {}
+    }
+
+    @Override
+    public void clear() {
+       title.setText("");
+        textBox.setText("");
+    }
+
+    public void sendToFilter(ListModel listModel) {
+        filter.setList(listModel);
+    }
+
+    public void setElementsList(ListModel list) {
+       this.list.setModel(list);
+        this.list.repaint();
+    }
+
     public void registerComponent(Component component) {
         component.setMediator(this);
         switch (component.getName()) {
@@ -82,67 +131,6 @@ public class Editor implements Mediator {
         }
     }
 
-    /**
-     * Various methods to handle requests from particular components.
-     */
-    @Override
-    public void addNewNote(Note note) {
-        title.setText("");
-        textBox.setText("");
-        list.addElement(note);
-    }
-
-    @Override
-    public void deleteNote() {
-        list.deleteElement();
-    }
-
-    @Override
-    public void getInfoFromList(Note note) {
-        title.setText(note.getName().replace('*', ' '));
-        textBox.setText(note.getText());
-    }
-
-    @Override
-    public void saveChanges() {
-        try {
-            Note note = (Note) list.getSelectedValue();
-            note.setName(title.getText());
-            note.setText(textBox.getText());
-            list.repaint();
-        } catch (NullPointerException ignored) {}
-    }
-
-    @Override
-    public void markNote() {
-        try {
-            Note note = list.getCurrentElement();
-            String name = note.getName();
-            if (!name.endsWith("*")) {
-                note.setName(note.getName() + "*");
-            }
-            list.repaint();
-        } catch (NullPointerException ignored) {}
-    }
-
-    @Override
-    public void clear() {
-        title.setText("");
-        textBox.setText("");
-    }
-
-    @Override
-    public void sendToFilter(ListModel listModel) {
-        filter.setList(listModel);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void setElementsList(ListModel list) {
-        this.list.setModel(list);
-        this.list.repaint();
-    }
-
     @Override
     public void hideElements(boolean flag) {
         titleLabel.setVisible(!flag);
@@ -155,7 +143,7 @@ public class Editor implements Mediator {
 
     @Override
     public void createGUI() {
-        JFrame notes = new JFrame("Notes");
+       JFrame notes = new JFrame("Notes");
         notes.setSize(960, 600);
         notes.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         JPanel left = new JPanel();

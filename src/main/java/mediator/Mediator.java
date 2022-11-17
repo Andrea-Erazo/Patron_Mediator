@@ -1,6 +1,9 @@
 
 package mediator;
 
+import components.Component;
+import javax.swing.ListModel;
+
 /**
  *
  * @author Andrea Erazo
